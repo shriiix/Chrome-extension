@@ -5,6 +5,7 @@ import TimerButton from './components/TimerButton';
 import TimerDisplay from './components/TimerDisplay';
 import DateSection from './components/DateSection';
 import EmptyState from './components/EmptyState ';
+import Report from './components/Report/Report';
 
 
 
@@ -114,7 +115,7 @@ const App = () => {
     setTimeEntries(timeEntries.filter(entry => entry.id !== entryId));
   };
 
-  // // Filter entries based on search text
+   // Filter entries based on search text
   const filteredEntries = timeEntries.filter(entry =>
     entry.taskName.toLowerCase().includes(searchText.toLowerCase()) ||
     entry.projectName.toLowerCase().includes(searchText.toLowerCase())
@@ -143,7 +144,7 @@ const App = () => {
 
 
   return (
-    <div className="w-[450px] h-[500px] bg-white shadow-lg rounded-sm overflow-hidden ">
+    <div className="w-[450px] h-[500px] bg-white shadow-lg rounded-sm overflow-visible ">
       {/* Header Navigation */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       
@@ -201,11 +202,17 @@ const App = () => {
               setEditingTaskId={setEditingTaskId}
             />
           ))}
+          {/* <div className="min-h-screen bg-gray-950 p-6 text-white">
+            <Report userName="Gaurav Golecha" />
+          </div> */}
+          
         </>
       )} 
-      
+      {activeTab === 'report'&&(
+        <Report userName='Guarav Golech'/>
+      )}
       {/* Other Tabs Content */}
-      {activeTab !== 'time' && (
+      {activeTab !== 'time' && activeTab != 'report' && (
         <EmptyState activeTab={activeTab} />
       )}
     </div>
