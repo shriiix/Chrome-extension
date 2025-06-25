@@ -1,5 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
+
+const EditableTaskName = ({taskName, onSave, isEditing, onEdit})=>{
+  const [editValue,  SetEditValue] = useState(taskName);
+  const inputRef  = useRef(null);
+  useEffect(()=>{
+    if(isEditing && inputRef.current){
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }[isEditing],
+)
+}
+
+
+
+
+
 
 const TimeEntry = ({ entry, onEdit, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);

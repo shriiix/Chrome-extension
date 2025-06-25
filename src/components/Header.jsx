@@ -3,10 +3,10 @@ import { Clock, FileText, Calendar, Timer } from 'lucide-react';
 
 const Header = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { id: 'time', label: 'Time', icon: Clock },
-    { id: 'report', label: 'Report', icon: FileText },
-    { id: 'timesheet', label: 'Timesheet', icon: Calendar },
-    { id: 'timers', label: 'Timers', icon: Timer }
+    { id: 'time', label: 'Time ', icon: Clock },
+    { id: 'report', label: 'Report ', icon: FileText },
+    { id: 'timesheet', label: 'Timesheet ', icon: Calendar },
+    { id: 'timers', label: 'Timers ', icon: Timer }
   ];
 
   return (

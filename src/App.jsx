@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
 import TimerButton from './components/TimerButton';
-// import TimerDisplay from './components/TimerDisplay';
-// import DateSection from './components/DateSection';
-// import EmptyState from './components/EmptyState';
+import TimerDisplay from './components/TimerDisplay';
+import DateSection from './components/DateSection';
+import EmptyState from './components/EmptyState ';
 
 const App = () => {
   // State Management
@@ -13,6 +13,7 @@ const App = () => {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isDateExpanded, setIsDateExpanded] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [editingTaskId, setEditingTaskId] = useState(null);
   const [timeEntries, setTimeEntries] = useState([
     {
       id: 1,
@@ -64,14 +65,14 @@ const App = () => {
   };
 
   // Entry management handlers
-  // const handleEditEntry = (entry) => {
-  //   console.log('Edit entry:', entry);
-  //   // TODO: Implement edit functionality
-  // };
+  const handleEditEntry = (entry) => {
+    console.log('Edit entry:', entry);
+    // TODO: Implement edit functionality
+  };
 
-  // const handleDeleteEntry = (entryId) => {
-  //   setTimeEntries(timeEntries.filter(entry => entry.id !== entryId));
-  // };
+  const handleDeleteEntry = (entryId) => {
+    setTimeEntries(timeEntries.filter(entry => entry.id !== entryId));
+  };
 
   // // Filter entries based on search text
   const filteredEntries = timeEntries.filter(entry =>
@@ -79,14 +80,25 @@ const App = () => {
     entry.projectName.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  
+
   // // Calculate total time
-  // const totalTime = filteredEntries.reduce((total, entry) => {
-  //   const minutes = parseInt(entry.duration.match(/(\d+)m/)?.[1] || 0);
-  //   return total + minutes;
-  // }, 0);
+  const totalTime = filteredEntries.reduce((total, entry) => {
+    const minutes = parseInt(entry.duration.match(/(\d+)m/)?.[1] || 0);
+    return total + minutes;
+  }, 0);
+
+  const handleEditTaskName = (entryId, newTaskName) => {
+  setTimeEntries(timeEntries.map(entry => 
+    entry.id === entryId 
+      ? { ...entry, taskName: newTaskName }
+      : entry
+  ));
+};
+
 
   return (
-    <div className="w-96 h-96 bg-white shadow-lg rounded-sm overflow-hidden">
+    <div className="w-[450px] h-[600px] bg-white shadow-lg rounded-sm overflow-hidden">
       {/* Header Navigation */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       
@@ -105,7 +117,7 @@ const App = () => {
           )}
           
           {/* Date Section with Time Entries */}
-          {/* <DateSection
+          <DateSection
             dateRange="Jun, 09 - Jun, 15"
             totalTime={`${totalTime}m`}
             isExpanded={isDateExpanded}
@@ -113,14 +125,17 @@ const App = () => {
             entries={filteredEntries}
             onEditEntry={handleEditEntry}
             onDeleteEntry={handleDeleteEntry}
-          /> */}
+            onEditTaskName={handleEditTaskName}
+            editingTaskId={editingTaskId}
+            setEditingTaskId={setEditingTaskId}
+          />
         </>
       )} 
       
       {/* Other Tabs Content */}
-      {/* {activeTab !== 'time' && (
+      {activeTab !== 'time' && (
         <EmptyState activeTab={activeTab} />
-      )} */}
+      )}
     </div>
   );
 };
