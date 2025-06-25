@@ -48,11 +48,6 @@ const EditableTaskName = ({taskName, onSave, isEditing, onEdit})=>{
 }
 
 
-
-
-
-
-
 const TimeEntry = ({ taskName,entry, onEdit, onDelete,onEditTaskName, editingTaskId, setEditingTaskId }) => {
   const [showMenu, setShowMenu] = useState(false);
   const isEditing = editingTaskId === entry.id;
