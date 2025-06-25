@@ -41,7 +41,7 @@ const EditableTaskName = ({taskName, onSave, isEditing, onEdit})=>{
   return (
     <button
       onClick={() => onEdit(true)}
-      className="text-sm font-medium text-gray-900 hover:text-green-600 text-left w-full">
+      className="text-sm font-medium text-gray-900 hover:text-green-600 text-left w-full overflow-auto">
       {taskName}
     </button>
   );

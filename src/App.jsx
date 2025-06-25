@@ -6,12 +6,35 @@ import TimerDisplay from './components/TimerDisplay';
 import DateSection from './components/DateSection';
 import EmptyState from './components/EmptyState ';
 
+
+
+const getCurrentWeekRange = () => {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const start = new Date(now);
+  const end = new Date(now);
+  start.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+  end.setDate(start.getDate() + 6);
+
+  const format = (date) =>
+    new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "2-digit",
+    }).format(date);
+
+  return `${format(start)} - ${format(end)}`;
+};
+
 const App = () => {
   // State Management
   const [activeTab, setActiveTab] = useState('time');
   const [searchText, setSearchText] = useState('');
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isDateExpanded, setIsDateExpanded] = useState(true);
+  const [dateRange, setDateRange] = useState("");
+  const [expandedMap, setExpandedMap] = useState({});
+  const [timeEntriesMap, setTimeEntriesMap] = useState({});
+  const [dateSections, setDateSections] = useState([]);
+  const [isDateExpanded, setIsDateExpanded] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [timeEntries, setTimeEntries] = useState([
@@ -22,8 +45,25 @@ const App = () => {
       projectCode: 'CRUE-57',
       projectName: 'CRUE - CP - Rudra ERP',
       projectColor: 'bg-yellow-400'
+    },
+    {
+      id: 2,
+      duration: '4m',
+      taskName: 'Bug Points of Release-1',
+      projectCode: 'TTSS-1',
+      projectName: 'TTSS - CP - MASS ERP',
+      projectColor: 'bg-red-500'
     }
+    
   ]);
+
+
+  useEffect(() => {
+  const defaultRange = getCurrentWeekRange();
+  setDateSections([defaultRange]);
+  setExpandedMap({ [defaultRange]: true });
+  setTimeEntriesMap({ [defaultRange]: [] });
+}, []);
 
   // Timer Effect - Runs when timer is active
   useEffect(() => {
@@ -80,8 +120,6 @@ const App = () => {
     entry.projectName.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  
-
   // // Calculate total time
   const totalTime = filteredEntries.reduce((total, entry) => {
     const minutes = parseInt(entry.duration.match(/(\d+)m/)?.[1] || 0);
@@ -94,11 +132,18 @@ const App = () => {
       ? { ...entry, taskName: newTaskName }
       : entry
   ));
+  //   const handleAddDateRange = () => {
+  //     const newRange = getCurrentWeekRange();
+  //     if (!dateSections.includes(newRange)) {
+  //       setDateSections([...dateSections, newRange]);
+  //     }
+  // }
+  
 };
 
 
   return (
-    <div className="w-[450px] h-[600px] bg-white shadow-lg rounded-sm overflow-hidden">
+    <div className="w-[450px] h-[500px] bg-white shadow-lg rounded-sm overflow-hidden ">
       {/* Header Navigation */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       
@@ -116,9 +161,21 @@ const App = () => {
             <TimerDisplay timerSeconds={timerSeconds} formatTime={formatTime} />
           )}
           
+          {/* <button
+            onClick={() => {
+              const newRange = getCurrentWeekRange();
+              if (!dateSections.includes(newRange)) {
+                setDateSections([...dateSections, newRange]);
+              }
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500"
+          >
+            + 
+          </button> */}
+          
           {/* Date Section with Time Entries */}
-          <DateSection
-            dateRange="Jun, 09 - Jun, 15"
+          {/* <DateSection
+            dateRange={dateRange}
             totalTime={`${totalTime}m`}
             isExpanded={isDateExpanded}
             onToggle={() => setIsDateExpanded(!isDateExpanded)}
@@ -128,7 +185,22 @@ const App = () => {
             onEditTaskName={handleEditTaskName}
             editingTaskId={editingTaskId}
             setEditingTaskId={setEditingTaskId}
-          />
+          /> */}
+          {dateSections.map((range, index) => (
+            <DateSection
+              key={index}
+              DateSection={range}
+              totalTime={`${totalTime}m`}
+              isExpanded={isDateExpanded}
+              onToggle={() => setIsDateExpanded(!isDateExpanded)}
+              entries={filteredEntries}
+              onEditEntry={handleEditEntry}
+              onDeleteEntry={handleDeleteEntry}
+              onEditTaskName={handleEditTaskName}
+              editingTaskId={editingTaskId}
+              setEditingTaskId={setEditingTaskId}
+            />
+          ))}
         </>
       )} 
       

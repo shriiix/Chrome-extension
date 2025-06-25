@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import TimeEntry from './TimeEntry';
 
 const DateSection = ({ 
-  dateRange, 
+  DateSection, 
   totalTime, 
   isExpanded, 
   onToggle, 
@@ -16,11 +16,11 @@ const DateSection = ({
 
 }) => {
   return (
-    <div className="border-b border-gray-100">
+    <div className="border-b border-gray-100 overflow-y-auto">
       {/* Date Section Header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50"
+        className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 overflow-auto"
       >
         <div className="flex items-center space-x-2">
           {/* Expand/Collapse Icon */}
@@ -30,7 +30,7 @@ const DateSection = ({
           />
           
           {/* Date Range */}
-          <span className="text-sm font-medium text-gray-700">{dateRange}</span>
+          <span className="text-sm font-medium text-gray-700">{DateSection}</span>
           
           {/* Separator */}
           <span className="text-xs text-gray-400">•••••</span>
@@ -45,8 +45,8 @@ const DateSection = ({
         <div className="bg-gray-50 max-h-64 overflow-y-auto">
           {/* Day Header */}
           <div className="px-6 py-2">
-            <div className="text-xs font-medium text-gray-500 mb-2">
-              Thursday • Jun 12
+            <div className="text-xs font-medium text-gray-500 mb-2 overflow-auto">
+              {DateSection}
             </div>
           </div>
           
