@@ -11,14 +11,14 @@ const Header = ({ activeTab, setActiveTab }) => {
 
   return (
     <div className="flex items-center justify-between p-3 py-5 bg-white border-b border-gray-200">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-6">
         {/* Logo */}
         <div className="w-8 h-8  bg-orange-500 rounded-full flex items-center justify-center">
           <div className="w-4 h-4 bg-white rounded-full"></div>
         </div>
         
         {/* Navigation Tabs */}
-        <nav className="flex space-x-1">
+        <nav className="flex space-x-4">
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
