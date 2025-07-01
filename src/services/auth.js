@@ -58,7 +58,7 @@ export const fetchTasks = async () => {
             const user = userStr ? JSON.parse(userStr) : null;
             console.log("💾 Parsed localStorage user:", user);
             resolve(user);
-          } catch (error) {
+          } catch (error) { 
             console.error("❌ Error parsing user from localStorage:", error);
             resolve(null);
           }
@@ -73,7 +73,7 @@ export const fetchTasks = async () => {
       return [];
     }
 
-    if (!user.id) {
+    if (!user.userId) {
       console.log("❌ User has no ID, returning empty tasks. User object:", user);
       return [];
     }
@@ -95,7 +95,7 @@ export const fetchTasks = async () => {
     }
 
     // Convert both IDs to strings for comparison
-    const userId = user.id.toString();
+    const userId = user.Id.toString();
     console.log(`🔍 Looking for tasks with userId: "${userId}"`);
     
     const userTasks = allTasks.filter((task, index) => {

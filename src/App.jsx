@@ -40,8 +40,7 @@ const App = () => {
   const [timeEntries, setTimeEntries] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
-  const[handleShowLogin] = useState()
-
+  const[handleShowLogin] = useState(false);
   // ✅ On load: check if user is already logged in
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -290,7 +289,7 @@ const App = () => {
           {isLoggedIn && (
             <div className="px-4 py-2 bg-gray-50 border-b text-xs">
               <div>User: {currentUser?.name || currentUser?.email || 'No user'}</div>
-              <div>User ID: {currentUser?.id || 'No ID'}</div>
+              <div>User ID: {currentUser?.Id || 'No ID'}</div>
               <div>Tasks: {timeEntries.length}</div>
               <button 
                 onClick={handleRefreshTasks}
