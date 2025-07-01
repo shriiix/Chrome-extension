@@ -1,54 +1,55 @@
-import React, {useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 
-const EditableTaskName = ({taskName, onSave, isEditing, onEdit})=>{
-  const [editValue,  SetEditValue] = useState(taskName);
-  const inputRef  = useRef(null);
-  useEffect(()=>{
-    if(isEditing && inputRef.current){
+const EditableTaskName = ({ taskName, onSave, isEditing, onEdit }) => {
+  const [editValue, setEditValue] = useState(taskName);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
     }
-  },[isEditing]);
+  }, [isEditing]);
 
-  const handleSave = () =>{
+  const handleSave = () => {
     onSave(editValue);
   };
 
-  const handleKeyPress = (e) =>{
-    if (e.key === 'Enter'){
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
       handleSave();
-    }else if(e.key =='Escape'){
-      SetEditValue(taskName);
+    } else if (e.key === 'Escape') {
+      setEditValue(taskName);
       onEdit(false);
     }
   };
 
-  if(isEditing){
-    return(
-      <input 
-        ref = {inputRef}
+  if (isEditing) {
+    return (
+      <input
+        ref={inputRef}
         type="text"
         value={editValue}
-        onChange={(e)=> SetEditValue(e.target.value)}
+        onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleSave}
         onKeyDown={handleKeyPress}
-        className="text-sm font-medium text-gray-900
-         bg-white border border-gray-300 rounded px-2 py-1 w-full focus:outline-none
-         focus:border-green-500"/>  
-    )
+        className="text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 w-full focus:outline-none focus:border-green-500"
+      />
+    );
   }
+
   return (
     <button
       onClick={() => onEdit(true)}
-      className="text-sm font-medium text-gray-900 hover:text-green-600 text-left w-full overflow-auto">
+      className="text-sm font-medium text-gray-900 hover:text-green-600 text-left w-full overflow-auto"
+    >
       {taskName}
     </button>
   );
-}
+};
 
-
-const TimeEntry = ({ taskName,entry, onEdit, onDelete,onEditTaskName, editingTaskId, setEditingTaskId }) => {
+const TimeEntry = ({ entry, onEdit, onDelete, onEditTaskName, editingTaskId, setEditingTaskId }) => {
   const [showMenu, setShowMenu] = useState(false);
   const isEditing = editingTaskId === entry.id;
 
@@ -56,23 +57,16 @@ const TimeEntry = ({ taskName,entry, onEdit, onDelete,onEditTaskName, editingTas
     onEditTaskName(entry.id, newName);
     setEditingTaskId(null);
   };
+
   return (
     <div className="flex items-center justify-between py-3 px-4 hover:bg-gray-50 group">
-      {/* Time Entry Details */}
       <div className="flex items-center space-x-3">
-        {/* Duration */}
-        <div className="text-sm font-medium text-gray-600 w-8">
-          {entry.duration}
-        </div>
-        
-        {/* Project Color Indicator */}
+        <div className="text-sm font-medium text-gray-600 w-8">{entry.duration}</div>
         <div className={`w-2 h-2 rounded-full ${entry.projectColor}`}></div>
-        
-        {/* Task and Project Information */}
         <div className="flex-1">
           <div className="text-sm font-medium text-gray-900">
             <EditableTaskName
-              taskName = {entry.taskName}
+              taskName={entry.taskName}
               onSave={handleTaskNameSave}
               isEditing={isEditing}
               onEdit={(editing) => setEditingTaskId(editing ? entry.id : null)}
@@ -83,8 +77,7 @@ const TimeEntry = ({ taskName,entry, onEdit, onDelete,onEditTaskName, editingTas
           </div>
         </div>
       </div>
-      
-      {/* Actions Menu */}
+
       <div className="relative">
         <button
           onClick={() => setShowMenu(!showMenu)}
@@ -92,16 +85,9 @@ const TimeEntry = ({ taskName,entry, onEdit, onDelete,onEditTaskName, editingTas
         >
           <MoreHorizontal size={16} />
         </button>
-        
-        {/* Dropdown Menu */}
+
         {showMenu && (
           <div className="absolute right-5 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-            {/* <button
-              onClick={() => onEdit(true)}
-              className="text-sm font-medium text-gray-900 hover:text-green-600 text-left w-full"
-            >
-              Edit
-            </button> */}
             <button
               onClick={() => {
                 onDelete(entry.id);

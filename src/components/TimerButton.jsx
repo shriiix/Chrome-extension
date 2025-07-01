@@ -7,8 +7,7 @@ const TimerButton = ({ isRunning, onToggle }) => {
       <button
         onClick={onToggle}
         className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md flex 
-                items-center justify-center space-x-2 transition-colors"
-      >
+                items-center justify-center space-x-2 transition-colors">
         {/* Dynamic Icon based on timer state */}
         {isRunning ? <Pause size={16} /> : <Play size={16} />}
         <span>{isRunning ? 'Stop Timer' : 'Start Timer'}</span>

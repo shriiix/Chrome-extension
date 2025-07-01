@@ -15,6 +15,9 @@ export default defineConfig({
       input: {
         popup: resolve(__dirname, 'index.html'),
       },
+      optimizeDeps: {
+        include: ['lucide-react']
+      },
       output: {
         entryFileNames: 'assets/[name].js',
         chunkFileNames: 'assets/[name].js',
