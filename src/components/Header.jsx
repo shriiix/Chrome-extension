@@ -12,7 +12,7 @@ const Header = ({ activeTab, setActiveTab, isLoggedIn, onLogout, onShowLogin, us
           className={`text-sm font-medium ${activeTab === 'time' ? 'text-green-600' : 'text-gray-600'}`}
           onClick={() => setActiveTab('time')}
         >
-          Time
+          My Task
         </button>
         {/* <button
           className={`text-sm font-medium ${activeTab === 'report' ? 'text-green-600' : 'text-gray-600'}`}
