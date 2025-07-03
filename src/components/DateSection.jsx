@@ -42,13 +42,13 @@ const DateSection = ({
             size={16} 
           />
           <span className="text-sm font-medium text-gray-700">{dateLabel}</span>
-          <span className="text-sm font-medium text-gray-900">{totalTime}</span>
+          <span className="text-sm font-medium text-gray-900">Task-List</span>
         </div>
       </button>
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="bg-gray-50 max-h-64 overflow-y-auto">
+        <div className="bg-gray-50 max-h-full overflow-y-auto">
           <div className="px-6 py-2">
             <div className="text-xs font-medium text-gray-500 mb-2 overflow-auto">
               {dateLabel}

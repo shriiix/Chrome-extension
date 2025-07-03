@@ -1,128 +1,220 @@
-// ✅ src/services/auth.js
-const API_BASE = "https://68625e2196f0cc4e34b96cf1.mockapi.io/api/test";
+// ✅ Updated fetchTasks using GraphQL query
 
-export const loginUser = async (email, password) => {
-  try {
-    const res = await fetch(`${API_BASE}/user`);
-    const users = await res.json();
+export const getApiBase = () =>
+  new Promise((resolve) => {
+    if (typeof window !== "undefined" && window.chrome?.storage?.local) {
+      chrome.storage.local.get("apiBase", (result) => {
+        resolve(result.apiBase || "");
+      });
+    } else {
+      resolve("");
+    }
+  });
 
-    const matchedUser = users.find(
-      (user) => user.email === email && user.password === password
-    );
+export const loginUser = async (email, password, siteUrl) => {
+  const url = `${siteUrl}/api/v1`;
 
-    if (!matchedUser) throw new Error("Invalid credentials");
+  return new Promise((resolve) => {
+    if (chrome?.runtime?.sendMessage) {
+      chrome.runtime.sendMessage(
+        {
+          type: "LOGIN_REQUEST",
+          url,
+          username: email,
+          password: password,
+        },
+        (response) => {
+          console.log("📦 Login response:", response);
 
-    const accessToken = "fake-access-token";
-    const refreshToken = "fake-refresh-token";
+          if (chrome.runtime.lastError) {
+            console.error("❌ Runtime error:", chrome.runtime.lastError.message);
+            return resolve({
+              success: false,
+              message: "Runtime error: " + chrome.runtime.lastError.message,
+            });
+          }
 
-    // Store user data and wait for completion
-    const storeUserData = () => new Promise((resolve) => {
-      if (typeof window !== "undefined" && window.chrome?.storage?.local) {
-        window.chrome.storage.local.set({ accessToken, refreshToken, user: matchedUser }, () => {
-          console.log("User data stored in Chrome storage");
-          resolve();
-        });
-      } else {
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("user", JSON.stringify(matchedUser));
-        console.log("User data stored in localStorage");
-        resolve();
-      }
-    });
+          const loginData = response?.data?.data?.login;
 
-    await storeUserData();
-    console.log("Login successful, user:", matchedUser);
-    return { success: true, user: matchedUser };
-  } catch (error) {
-    console.error("Login error:", error.message);
-    return { success: false, message: error.message };
-  }
+          if (response?.success && loginData) {
+            const { authToken, refreshToken, user } = loginData;
+
+            chrome.storage.local.set(
+              { accessToken: authToken, refreshToken, user, apiBase: url },
+              () => {
+                console.log("✅ Login data stored");
+                resolve({ success: true, user });
+              }
+            );
+          } else {
+            console.error("❌ Invalid login response structure:", response);
+            resolve({
+              success: false,
+              message: response?.error || "Login failed",
+            });
+          }
+        }
+      );
+    } else {
+      resolve({ success: false, message: "Chrome runtime not available" });
+    }
+  });
 };
 
 export const fetchTasks = async () => {
   try {
-    console.log("🔍 Starting fetchTasks...");
-    
-    const getUser = () =>
-      new Promise((resolve) => {
-        if (typeof window !== "undefined" && window.chrome?.storage?.local) {
-          window.chrome.storage.local.get("user", (result) => {
-            console.log("📦 Chrome storage user:", result.user);
-            resolve(result.user || null);
-          });
-        } else {
-          const userStr = localStorage.getItem("user");
-          console.log("💾 LocalStorage user string:", userStr);
-          try {
-            const user = userStr ? JSON.parse(userStr) : null;
-            console.log("💾 Parsed localStorage user:", user);
-            resolve(user);
-          } catch (error) { 
-            console.error("❌ Error parsing user from localStorage:", error);
-            resolve(null);
-          }
-        }
-      });
-
-    const user = await getUser();
-    console.log("👤 Current user for task fetch:", user);
-    
-    if (!user) {
-      console.log("❌ No user found, returning empty tasks");
-      return [];
-    }
-
-    if (!user.userId) {
-      console.log("❌ User has no ID, returning empty tasks. User object:", user);
-      return [];
-    }
-
-    console.log(`🌐 Fetching tasks from API: ${API_BASE}/task`);
-    const res = await fetch(`${API_BASE}/task`);
-    
-    if (!res.ok) {
-      throw new Error(`Failed to fetch tasks: ${res.status} ${res.statusText}`);
-    }
-    
-    const allTasks = await res.json();
-    console.log("📋 All tasks from API:", allTasks);
-    console.log("📋 Number of tasks from API:", allTasks.length);
-
-    if (!Array.isArray(allTasks)) {
-      console.error("❌ API did not return an array. Received:", typeof allTasks, allTasks);
-      return [];
-    }
-
-    // Convert both IDs to strings for comparison
-    const userId = user.Id.toString();
-    console.log(`🔍 Looking for tasks with userId: "${userId}"`);
-    
-    const userTasks = allTasks.filter((task, index) => {
-      const taskUserId = task.userId ? task.userId.toString() : '';
-      const matches = taskUserId === userId;
-      console.log(`📋 Task ${index}: userId="${taskUserId}", matches=${matches}`, task);
-      return matches;
+    const storageData = await new Promise((resolve) => {
+      if (typeof window !== "undefined" && window.chrome?.storage?.local) {
+        chrome.storage.local.get(["user", "accessToken", "apiBase"], (result) => {
+          resolve(result);
+        });
+      } else {
+        resolve({});
+      }
     });
 
-    console.log("✅ Filtered user tasks:", userTasks);
-    console.log("✅ Number of user tasks:", userTasks.length);
-    return userTasks;
-  } catch (error) {
-    console.error("❌ Error fetching tasks:", error);
-    console.error("❌ Error details:", error.message, error.stack);
+    const { user, accessToken, apiBase } = storageData;
+
+    if (!user?.userId || !accessToken || !apiBase) {
+      console.warn("❌ Missing user ID, token, or apiBase");
+      return [];
+    }
+
+    const graphqlQuery = {
+      query: `{
+        projectTasks(where: {assignedTo: ${user.userId}}, first: 10) {
+          nodes {
+            id
+            projectTaskId
+            title
+            content
+            taskFields {
+              dueDate
+              estimate
+              startDate
+              taskFiles {
+                taskFile {
+                  node {
+                    id
+                    mediaItemId
+                    mediaItemUrl
+                    sourceUrl
+                  }
+                }
+              }
+              assignedTo {
+                nodes {
+                  id
+                  userId
+                  firstName
+                  lastName
+                  profileImage
+                }
+              }
+              taskLogs {
+                logId
+                startTime
+                endTime
+                trackedTime
+                lastActivityType
+                logDescription
+                userDetails {
+                  nodes {
+                    firstName
+                    lastName
+                    profileImage
+                    userId
+                  }
+                }
+              }
+              relatedMilestones {
+                nodes {
+                  id
+                  slug
+                  ... on ProjectMilestone {
+                    id
+                    title
+                  }
+                }
+              }
+            }
+            taskStatues {
+              nodes {
+                id
+                name
+                description
+              }
+            }
+            taskTags {
+              nodes {
+                id
+                name
+                description
+              }
+            }
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            startCursor
+          }
+        }
+      }`,
+      variables: {}
+    };
+
+    const response = await fetch(`${apiBase}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(graphqlQuery),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const json = await response.json();
+    const tasks = json?.data?.projectTasks?.nodes || [];
+
+    // 🛠 Patch each task to ensure taskName exists for search compatibility
+    const patchedTasks = tasks.map((task) => ({
+      ...task,
+      taskName: task.title || '',
+      projectName: task.taskFields?.relatedMilestones?.nodes?.[0]?.title || 'Untitled Project',
+      projectCode: `PRJ-${task.projectTaskId || task.id}`,
+      projectColor: 'bg-purple-300'
+    }));
+
+    console.log("📥 GraphQL Tasks received:", patchedTasks);
+    return patchedTasks;
+  } catch (err) {
+    console.error("❌ Error fetching tasks:", err);
     return [];
   }
 };
 
 export const logoutUser = () => {
-  if (typeof chrome !== "undefined" && chrome?.storage?.local) {
-    chrome.storage.local.remove(['accessToken', 'refreshToken', 'user', 'task']);
-  } else {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('task');
-  }
-  console.log("User logged out successfully");
+  chrome.storage.local.remove(
+    ["accessToken", "refreshToken", "user", "apiBase"],
+    () => {
+      console.log("✅ Logged out - storage cleared");
+    }
+  );
+};
+
+export const checkAuthStatus = () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(["accessToken", "user"], (result) => {
+      const isAuthenticated = !!(result.accessToken && result.user);
+      resolve({
+        isAuthenticated,
+        user: result.user || null,
+        accessToken: result.accessToken || null,
+      });
+    });
+  });
 };

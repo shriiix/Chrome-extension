@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aniruddha1806/calendar": "^1.0.3",
     "@tailwindcss/vite": "^4.1.10",
     "lucide-react": "^0.522.0",
     "react": "^19.1.0",

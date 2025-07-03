@@ -1,101 +1,76 @@
+// ✅ LoginModal.jsx (only handles login now)
 import React, { useState } from 'react';
 import { loginUser } from '../services/auth';
 
 const LoginModal = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [selectedSite, setSelectedSite] = useState('https://api-amdital.dev.diginnovators.site/wp');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
-    }
-
+  const handleLogin = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    try {
-      const result = await loginUser(email, password);
-      console.log("Login result:", result);
+    const result = await loginUser(email, password, selectedSite);
+    setIsLoading(false);
 
-      if (result.success) {
-        // Log storage contents after login
-        if (typeof chrome !== "undefined" && chrome?.storage?.local) {
-          chrome.storage.local.get(null, (all) => {
-            console.log("Chrome storage after login:", all);
-          });
-        } else {
-          console.log("LocalStorage after login:", {
-            accessToken: localStorage.getItem('accessToken'),
-            user: localStorage.getItem('user')
-          });
-        }
-        
-        // Signal success - App.jsx will handle retrieving user from storage
-        onClose(true);
-      } else {
-        setError(result.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin();
+    if (result.success) {
+      onClose(true, result.user); // tell App to move to next page
+    } else {
+      setError(result.message || 'Login failed');
+      console.log(res);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-md shadow-xl p-6 w-80">
-        <h2 className="text-xl font-semibold mb-4 text-center">Login</h2>
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="w-full border border-gray-300 p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-          disabled={isLoading}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="w-full border border-gray-300 p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-          disabled={isLoading}
-        />
-
-        {error && (
-          <p className="text-sm text-red-500 mb-3">{error}</p>
-        )}
-
-        <button
-          onClick={handleLogin}
-          disabled={isLoading}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded mb-2 transition"
-        >
-          {isLoading ? 'Logging in...' : 'Login'}
-        </button>
-
-        <button
-          onClick={() => onClose(false)}
-          disabled={isLoading}
-          className="w-full text-gray-500 hover:underline disabled:text-gray-300"
-        >
-          Cancel
-        </button>
+    <div className="fixed inset-0 bg-[#090223] bg-opacity-90 flex justify-center items-center z-50 font-sans">
+      <div className="bg-white w-[400px] rounded-lg shadow-lg p-8">
+        <h1 className="text-3xl font-semibold text-center text-[#290974] mb-1">
+          Am<span className="font-bold">Dital</span>
+        </h1>
+        <p className="text-sm text-gray-500 text-center mb-6">
+          Enter your credentials to access your account.
+        </p>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Enter the email ID"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-3 py-2 border rounded-md outline-none focus:ring-2 ring-purple-400"
+          />
+          <input
+            type="password"
+            placeholder="Enter the password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-3 py-2 border rounded-md outline-none focus:ring-2 ring-purple-400"
+          />
+          {/* <select
+            value={selectedSite}
+            onChange={(e) => setSelectedSite(e.target.value)}
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="https://api-amdital.dev.diginnovators.site/wp">Dev Site</option>
+            <option value="https://demo.diginnovators.site/wp">Demo Site</option>
+          </select> */}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-purple-600 text-white py-2 rounded-md font-medium hover:bg-purple-700 transition"
+          >
+            {isLoading ? 'Signing In...' : 'Sign In'}
+          </button>
+        </form>
+        <p className="text-center text-xs text-gray-400 mt-6">
+          © AmDital • Privacy & Terms
+        </p>
       </div>
     </div>
   );

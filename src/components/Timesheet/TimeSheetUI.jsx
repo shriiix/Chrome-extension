@@ -215,14 +215,14 @@ const TimesheetUI = () => {
                 {/* Calendar */}
                 <div className="bg-gray-200 border-2 last:border-r-2 overflow-auto overflow-y-auto rounded-md">
                     {/* Day headers */}
-                    <div className="grid grid-cols-8 border-b  border-black last:border-b-2">
-                        <div className="bg-gray-200  last:border-b-2"></div>
+                    <div className="grid grid-cols-8 border-b border-r  border-white last:border-b-2">
+                        <div className="bg-gray-200 text-center text-gray-800 text-xs font-medium py-1">TOTALS</div>
                         {dayNames.map(day => (
-                            <div key={day} className="bg-gray-200 text-center text-gray-800 text-xs border-gray-900 font-semibold py-1 px-2 last:border-r-2">
+                            <div key={day} className="bg-gray-200 text-center text-gray-800 text-xs font-semibold py-1 px-2 last:border-r-2">
                                 {day}
                             </div>
                         ))}
-                        <div className="bg-gray-200 text-center text-gray-800 text-xs font-medium px-2">TOTALS</div>
+                        <div className="bg-gray-200 text-center text-gray-800 text-xs font-medium py-1"></div>
                     </div>
 
                     {/* Calendar grid */}
@@ -239,12 +239,12 @@ const TimesheetUI = () => {
                             const lastDay = weekDays.filter(d => d).pop();
 
                             return (
-                                <div key={weekIndex} className="grid grid-cols-8 border-b  border-black last:border-b-1">
+                                <div key={weekIndex} className="grid grid-cols-8 border-r border-b border-white last:border-b-1">
                                     {/* Week range - vertical layout */}
-                                    <div className="bg-gray-500 border-gray-900 text-gray-400 text-xs py-1 px-2  flex items-center justify-center">
+                                    <div className="bg-gray-200 border-r border-white text-gray-900 text-xs py-1 px-2  flex items-center justify-center">
                                         {firstDay && lastDay && (
                                             <div className="text-center leading-tight">
-                                                <div className="text-gray-800 font-semibold text-xs mb-1">
+                                                <div className="text-gray-900 font-semibold text-xs mb-1">
                                                     {firstDay && lastDay && `Jun ${firstDay} - Jun ${lastDay}`}
                                                     <div className="text-white text-sm font-medium">
                                                         {weekTotal > 0 ? weekTotal.toFixed(2) : '-'}
@@ -258,16 +258,16 @@ const TimesheetUI = () => {
                                     {weekDays.map((day, dayIndex) => {
                                         const hours = getHoursForDay(day);
                                         const hasData = hours !== null;
-                                        const todayClass = isToday(day) ? 'bg-gray-900 ring-2 ring-green-600' : '';
+                                        const todayClass = isToday(day) ? 'bg-gray-400 ring-2 ring-green-600' : '';
 
                                         return (
                                             <div
                                                 key={dayIndex}
                                                 onClick={() => handleDayClick(day)}
-                                                className={`bg-gray-600 hover:bg-gray-700 cursor-pointer transition-colors ${todayClass} py-1 px-2 
-                                                             border-b border-r border-gray-600 flex flex-col items-center justify-center min-h-16`}
+                                                className={`bg-gray-400 hover:bg-gray-600 cursor-pointer transition-colors ${todayClass} py-1 px-2 
+                                                             border-b border-r border-white flex flex-col items-center justify-center min-h-16`}
                                             >
-                                                <div className="text-xs text-gray-400 mb-1">
+                                                <div className="text-xs text-gray-900 mb-1">
                                                     {String(day || '').padStart(2, '0')}
                                                 </div>
                                                 <div className="text-white text-sm font-medium">
@@ -281,8 +281,8 @@ const TimesheetUI = () => {
                         })}
                     </div>
 
-                    <div className="bg-gray-500 p-1 border-t border-gray-600">
-                        <div className="text-gray-400 text-xs">
+                    <div className="bg-gray-200 p-1 border-t border-gray-600">
+                        <div className="text-gray-900 text-xs">
                             Click a calendar cell to view daily details.
                         </div>
                     </div>
