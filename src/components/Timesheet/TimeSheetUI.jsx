@@ -8,6 +8,14 @@ const TimesheetUI = () => {
     const [selectedDay, setSelectedDay] = useState(null);
     const [showDayDetails, setShowDayDetails] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    useEffect(() => {
+        chrome.storage.local.get('user', (result) => {
+            if (result.user) {
+                setCurrentUser(result.user);
+            }
+        });
+    }, [])
 
     // Sample clients data
     const clients = [
@@ -161,59 +169,10 @@ const TimesheetUI = () => {
                             <ChevronRight size={20} />
                         </button>
                     </div>
-
-                    {/* Client Selector */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowClientDropdown(!showClientDropdown)}
-                            className="flex items-center gap-2 font-sans bg-gray-200 hover:bg-gray-500 px-4 py-2 rounded-lg transition-colors"
-                        >
-                            <div className={`w-8 h-8 rounded-full ${selectedClientData?.color} flex items-center justify-center text-gray-800 font-semibold`}>
-                                {selectedClientData?.avatar}
-                            </div>
-                            <span>{selectedClient}</span>
-                            <ChevronDown size={16} />
-                        </button>
-
-                        {showClientDropdown && (
-                            <div ref={menuRef} className="absolute right-0 top-full mt-2 bg-gray-400 border border-gray-900 rounded-lg shadow-lg z-10 min-w-64">
-                                <div className="p-2 border-b border-gray-500">
-                                    <div className="text-sm font-semibold text-gray-900 mb-2">SELECT MEMBER</div>
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        className="w-full bg-gray-500 text-gray-900 px-3 py-2 rounded border-none outline-none"
-                                    />
-                                </div>
-                                <div ref={menuRef} className="max-h-64 overflow-y-auto">
-                                    {clients.map((client) => (
-                                        <button
-                                            key={client.id}
-                                            onClick={() => {
-                                                setSelectedClient(client.name);
-                                                setShowClientDropdown(false);
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors"
-                                        >
-                                            <div className="relative">
-                                                <div className={`w-8 h-8 rounded-full ${client.color} flex items-center justify-center text-white font-semibold`}>
-                                                    {client.avatar}
-                                                </div>
-                                                {client.name === selectedClient && (
-                                                    <div className="absolute -top-1 -left-1 w-3 h-3 bg-gray-400 rounded-full"></div>
-                                                )}
-                                            </div>
-                                            <span className="text-left">{client.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 {/* Calendar */}
-                <div className="bg-gray-200 border-2 last:border-r-2 overflow-auto overflow-y-auto rounded-md">
+                <div className="bg-gray-200 border-2 last:border-r-2 rounded-md">
                     {/* Day headers */}
                     <div className="grid grid-cols-8 border-b border-r  border-white last:border-b-2">
                         <div className="bg-gray-200 text-center text-gray-800 text-xs font-medium py-1">TOTALS</div>
@@ -246,7 +205,7 @@ const TimesheetUI = () => {
                                             <div className="text-center leading-tight">
                                                 <div className="text-gray-900 font-semibold text-xs mb-1">
                                                     {firstDay && lastDay && `Jun ${firstDay} - Jun ${lastDay}`}
-                                                    <div className="text-white text-sm font-medium">
+                                                    <div className="text-gray-900 text-sm font-medium">
                                                         {weekTotal > 0 ? weekTotal.toFixed(2) : '-'}
                                                     </div>
                                                 </div>
@@ -290,7 +249,7 @@ const TimesheetUI = () => {
 
                 {/* Day Details Modal */}
                 {showDayDetails && selectedDay && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-gray-400 bg-opacity-30 flex items-center justify-center z-50">
                         <div className="bg-gray-400 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xl font-semibold flex items-center gap-2">

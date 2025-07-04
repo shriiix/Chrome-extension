@@ -1,54 +1,104 @@
-import React, { useState } from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import React from 'react';
 
-const TimeEntry = ({ entry, onDelete }) => {
-  const [showMenu, setShowMenu] = useState(false);
+// Define the columns for the Chrome Extension's task table
+const columns = [
+  {
+    key: 'task',
+    render: ({ taskName, selected, onSelect, onTimerClick, timerRunning }) => (
+      <div className="flex items-start gap-3 px-6 py-3">
+        {/* Checkbox */}
+        <span className="mt-1">
+          {selected ? (
+            <span className="inline-block w-5 h-5 rounded-full border-2 border-[#00B656] bg-white flex items-center justify-center">
+              <svg className="w-3 h-3 text-[#00B656]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </span>
+          ) : (
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onSelect}
+              className="w-5 h-5 rounded-full border-2 border-[#DCD6FF] text-[#806BFF] focus:ring-0"
+            />
+          )}
+        </span>
+        {/* Task Name */}
+        <span className="block truncate max-w-[220px]">{taskName}</span>
+        {/* Timer */}
+        <span className="ml-auto ">
+          <div
+            onClick={onTimerClick}
+            className={`w-[18px] h-[18px] rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200
+              ${timerRunning ? 'bg-[#FF0000]' : 'bg-[#DCD6FF] hover:bg-[#008D43]'}
+            `}
+            title={timerRunning ? 'Stop Timer' : 'Start Timer'}
+          >
+            <img
+              src={process.env.PUBLIC_URL + '/assets/images/amdital/task_new/play_icon_white.svg'}
+              alt="play"
+              className="w-3 h-3"
+              draggable="false"
+            />
+          </div>
+        </span>
+      </div>
+    ),
+    className: 'col-span-2',
+  },
+  {
+    key: 'dueDate',
+    render: ({ dueDate, formatDueDate }) => (
+      <div className="text-center px-4 py-3">{formatDueDate(dueDate)}</div>
+    ),
+  },
+  {
+    key: 'tags',
+    render: ({ tags }) => (
+      <div className="flex flex-wrap gap-1 justify-center px-4 py-3">
+        {tags.map((tag) => (
+          <span key={tag.id || tag.name} style={{ background: tag.description }} className="px-2 py-0.5 rounded-full text-xs font-semibold text-white">
+            {tag.name}
+          </span>
+        ))}
+      </div>
+    ),
+  },
+  {
+    key: 'status',
+    render: ({ status }) => (
+      <div className="text-center px-4 py-3">
+        {status?.name ? (
+          <span className="inline-flex items-center gap-1 justify-center">
+            <span className="w-2 h-2 rounded-full" style={{ background: status.description || '#E1DCFF' }}></span>
+            <span className="text-xs font-semibold text-[#26212E]">{status.name}</span>
+          </span>
+        ) : (
+          <span className="text-[#B9B4C8] text-xs font-semibold">Select Status</span>
+        )}
+      </div>
+    ),
+  },
+];
+
+const TimeEntry = (props) => {
+  const formatDueDate = (date) => {
+    if (!date) return '--';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+  };
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 hover:bg-gray-50 group">
-      <div className="flex items-center space-x-3">
-        <div className="text-sm font-medium text-gray-600 w-8">{entry.duration || '--'}</div>
-        <div className={`w-2 h-2 rounded-full ${entry.projectColor}`}></div>
-        <div className="flex-1">
-          <div className="text-sm font-medium text-gray-900">
-            {entry.taskName || entry.title || 'Untitled Task'}
+    <div className="grid grid-cols-5 items-center border border-[#E1DCFF] bg-white hover:bg-[#F8F7FC] font-albert font-semibold">
+      {columns.map((col, idx) => {
+        // Only add right border except for the last column
+        let borderClass = '';
+        if (idx !== columns.length - 1) borderClass = 'border-r border-[#E1DCFF]';
+        if (col.className) borderClass += ' ' + col.className;
+        return (
+          <div key={col.key} className={borderClass}>
+            {col.render({ ...props, formatDueDate })}
           </div>
-          <div className="text-xs text-gray-500">
-            {entry.projectCode} • {entry.projectName}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-4">
-        {entry.taskFields?.dueDate && (
-          <div className="text-xs text-gray-500 whitespace-nowrap">
-            Due: {new Date(entry.taskFields.dueDate).toLocaleDateString()}
-          </div>
-        )}
-
-        <div className="relative">
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <MoreHorizontal size={16} />
-          </button>
-
-          {showMenu && (
-            <div className="absolute right-5 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-              <button
-                onClick={() => {
-                  onDelete(entry.id);
-                  setShowMenu(false);
-                }}
-                className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 };

@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
-import TimerButton from './components/TimerButton';
-import TimerDisplay from './components/TimerDisplay';
 import DateSection from './components/DateSection';
 import Report from './components/Report/Report';
 import TimesheetUI from './components/Timesheet/TimeSheetUi';
 import LoginModal from './components/LoginModal';
 import EnvironmentSelector from './components/EnvironmentSelector';
 import { fetchTasks, logoutUser } from './services/auth';
+import TimeEntry from './components/TimeEntry';
+import TaskTable from './components/TaskTable';
 
 const getCurrentWeekRange = () => {
   const now = new Date();
@@ -31,10 +31,7 @@ const getCurrentWeekRange = () => {
 const App = () => {
   const [activeTab, setActiveTab] = useState('time');
   const [searchText, setSearchText] = useState('');
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [dateSections, setDateSections] = useState([]);
-  const [isDateExpanded, setIsDateExpanded] = useState(true);
-  const [timerSeconds, setTimerSeconds] = useState(0);
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -72,40 +69,6 @@ const App = () => {
     const defaultRange = getCurrentWeekRange();
     setDateSections([defaultRange]);
   }, []);
-  
-  useEffect(() => {
-    let interval;
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setTimerSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isTimerRunning]);
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}m ${secs}s`;
-  };
-
-  const handleTimerToggle = () => {
-    if (isTimerRunning && timerSeconds > 0) {
-      const newEntry = {
-        id: Date.now(),
-        userId: currentUser?.userId?.toString() || '',
-        duration: formatTime(timerSeconds),
-        taskName: searchText || 'New Task',
-        projectCode: 'NEW-01',
-        projectName: 'Current Project',
-        projectColor: 'bg-blue-400',
-      };
-      setTimeEntries([newEntry, ...timeEntries]);
-      setTimerSeconds(0);
-      setSearchText('');
-    }
-    setIsTimerRunning(!isTimerRunning);
-  };
 
   const handleDeleteEntry = (entryId) => {
     setTimeEntries(timeEntries.filter((entry) => entry.id !== entryId));
@@ -122,19 +85,20 @@ const App = () => {
   const filteredEntries = timeEntries.filter((entry) => {
     const taskName = entry.taskName || entry.title || '';
     const projectName = entry.projectName || '';
+    const lowerSearch = searchText.toLowerCase();
 
-    return taskName.toLowerCase().includes(searchText.toLowerCase()) ||
-      projectName.toLowerCase().includes(searchText.toLowerCase());
+    return (
+      taskName.toLowerCase().includes(lowerSearch) ||
+      projectName.toLowerCase().includes(lowerSearch)
+    );
   });
 
-
   const totalTime = filteredEntries.reduce((total, entry) => {
-  const duration = entry.duration || ''; // fallback
-  const match = duration.match(/(\\d+)m/);
-  const minutes = match ? parseInt(match[1]) : 0;
-  return total + minutes;
-}, 0);
-
+    const duration = entry.duration || '';
+    const match = duration.match(/(\d+)m/);
+    const minutes = match ? parseInt(match[1]) : 0;
+    return total + minutes;
+  }, 0);
 
   const handleLogout = () => {
     logoutUser();
@@ -168,7 +132,7 @@ const App = () => {
   };
 
   return (
-    <div className="w-[600px] h-[600px] bg-white shadow-lg rounded-sm">
+    <div className="w-[600px] h-[600px] background_color shadow-lg rounded-sm font-albert">
       {showLogin && <LoginModal onClose={handleLoginSuccess} />}
       {showSelector && <EnvironmentSelector onSelect={handleEnvironmentSelected} />}
 
@@ -186,31 +150,21 @@ const App = () => {
           {activeTab === 'time' && (
             <>
               <SearchBar searchText={searchText} setSearchText={setSearchText} />
-              <TimerButton isRunning={isTimerRunning} onToggle={handleTimerToggle} />
-              {isTimerRunning && <TimerDisplay timerSeconds={timerSeconds} formatTime={formatTime} />}
-
               {isLoggedIn ? (
-                <>
-                  {dateSections.map((range, index) => (
-                    <DateSection
-                      key={index}
-                      DateSection={range}
-                      totalTime={`${totalTime}m`}
-                      isExpanded={isDateExpanded}
-                      onToggle={() => setIsDateExpanded(!isDateExpanded)}
-                      entries={filteredEntries}
-                      onDeleteEntry={handleDeleteEntry}
-                      onEditTaskName={handleEditTaskName}
-                      editingTaskId={editingTaskId}
-                      setEditingTaskId={setEditingTaskId}
-                    />
-                  ))}
-                  {filteredEntries.length === 0 && (
-                    <div className="p-4 text-center text-gray-500">
-                      No tasks found. Start a timer to create your first task!
-                    </div>
-                  )}
-                </>
+                <div className="px-4">
+                  <TaskTable
+                    tasks={filteredEntries.map((task, idx) => ({
+                      ...task,
+                      // Mock timer: only first task running for demo
+                      timerRunning: idx === 0,
+                      timerValue: idx === 0 ? '119:38:08' : '',
+                    }))}
+                    onTimerClick={(task) => {
+                      // TODO: Implement timer start/stop logic here
+                      alert(`Timer clicked for task: ${task.title}`);
+                    }}
+                  />
+                </div>
               ) : (
                 <div className="p-4 text-center text-gray-500">
                   Please login to view your tasks.
@@ -218,15 +172,6 @@ const App = () => {
               )}
             </>
           )}
-
-          {/* {activeTab === 'report' && (
-            <Report
-              userName={currentUser?.name || ''}
-              timeEntries={timeEntries}
-              searchText={searchText}
-              setSearchText={setSearchText}
-            />
-          )} */}
 
           {activeTab === 'timesheet' && (
             <div className="App">

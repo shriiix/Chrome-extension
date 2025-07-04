@@ -9,17 +9,15 @@ const Header = ({ activeTab, setActiveTab, isLoggedIn, onLogout, onShowLogin, us
       {/* Tabs */}
       <div className="flex space-x-8">
         <button
-          className={`text-sm font-semibold tracking-wide ${
-            activeTab === 'time' ? 'text-purple-900 border-b-2 border-purple-600' : 'text-gray-600'
-          }`}
+          className={`text-sm font-semibold tracking-wide ${activeTab === 'time' ? 'text-purple-900 border-b-2 border-purple-600' : 'text-gray-600'
+            }`}
           onClick={() => setActiveTab('time')}
         >
           My Task
         </button>
         <button
-          className={`text-sm font-semibold tracking-wide ${
-            activeTab === 'timesheet' ? 'text-purple-900 border-b-2 border-purple-600' : 'text-gray-600'
-          }`}
+          className={`text-sm font-semibold tracking-wide ${activeTab === 'timesheet' ? 'text-purple-900 border-b-2 border-purple-600' : 'text-gray-600'
+            }`}
           onClick={() => setActiveTab('timesheet')}
         >
           Timesheet

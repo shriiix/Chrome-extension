@@ -82,7 +82,7 @@ export const fetchTasks = async () => {
 
     const graphqlQuery = {
       query: `{
-        projectTasks(where: {assignedTo: ${user.userId}}, first: 10) {
+        projectTasks(where: {assignedTo: ${user.userId}}, first: 1000) {
           nodes {
             id
             projectTaskId
@@ -186,7 +186,8 @@ export const fetchTasks = async () => {
       taskName: task.title || '',
       projectName: task.taskFields?.relatedMilestones?.nodes?.[0]?.title || 'Untitled Project',
       projectCode: `PRJ-${task.projectTaskId || task.id}`,
-      projectColor: 'bg-purple-300'
+      projectColor: 'bg-purple-300',
+
     }));
 
     console.log("📥 GraphQL Tasks received:", patchedTasks);
